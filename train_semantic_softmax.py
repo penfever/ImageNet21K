@@ -30,7 +30,9 @@ parser.add_argument('--model_name', default='tresnet_m')
 parser.add_argument('--model_path', default='./tresnet_m.pth', type=str)
 parser.add_argument('--num_workers', default=8, type=int)
 parser.add_argument('--image_size', default=224, type=int)
-parser.add_argument('--num_classes', default=11221, type=int)
+#21,841 for 21k
+#11221 was the default in the original paper
+parser.add_argument('--num_classes', default=21841, type=int)
 parser.add_argument('--batch_size', default=64, type=int)
 parser.add_argument('--epochs', default=80, type=int)
 parser.add_argument('--weight_decay', default=1e-4, type=float)
@@ -99,7 +101,11 @@ def train_21k(model, train_loader, val_loader, optimizer, semantic_softmax_proce
             "\nFinished Epoch, Training Rate: {:.1f} [img/sec]".format(len(train_loader) *
                                                                       args.batch_size / epoch_time * max(num_distrib(),
                                                                                                          1)))
-
+        print("Saving model weights: ")
+        torch.save(
+            model,
+            os.path.join(".", f"epoch_{str(epoch)}.pt"),
+        )
         # validation epoch
         validate_21k(val_loader, model, met)
 

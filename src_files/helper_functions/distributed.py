@@ -26,13 +26,13 @@ def print_at_master(str):
 
 def setup_distrib(args):
     if num_distrib() > 1:
-        torch.cuda.set_device(args.local_rank)
+        torch.cuda.set_device(int(os.environ["LOCAL_RANK"]))
         torch.distributed.init_process_group(backend='nccl', init_method='env://')
 
 
 def to_ddp(model, args):
     if num_distrib() > 1:
-        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.local_rank])
+        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[int(os.environ["LOCAL_RANK"])])
     return model
 
 

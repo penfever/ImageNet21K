@@ -1,6 +1,6 @@
 import torch
 import timm
-
+from vit_pytorch import ViT
 from ..ofa.model_zoo import ofa_flops_595m_s
 from ..tresnet import TResnetM, TResnetL
 from src_files.helper_functions.distributed import print_at_master
@@ -39,6 +39,16 @@ def create_model(args):
         model = ofa_flops_595m_s(model_params)
     elif args.model_name == 'resnet50':
         model = timm.create_model('resnet50', pretrained=False, num_classes=args.num_classes)
+    elif args.model_name == 'vit_lucid':
+        model = ViT(
+            image_size = args.image_size,
+            patch_size = 32,
+            num_classes = args.num_classes,
+            dim = 1024,
+            depth = 6,
+            heads = 16,
+            mlp_dim = 2048
+        )
     elif args.model_name == 'vit_base_patch16_224': # notice - qkv_bias==False currently
         model_kwargs = dict(
             patch_size=16, embed_dim=768, depth=12, num_heads=12, representation_size=None, qkv_bias=False)
