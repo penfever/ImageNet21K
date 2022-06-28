@@ -7,10 +7,12 @@
 
 import argparse
 import time
+from datetime import datetime
 import torch
 import torch.nn.parallel
 import torch.optim
 import torch.utils.data.distributed
+import os
 from torch.optim import lr_scheduler
 
 from src_files.data_loading.data_loader import create_data_loaders
@@ -86,7 +88,15 @@ def train_21k(model, train_loader, val_loader, optimizer, semantic_softmax_proce
         # train epoch
         print_at_master("\nEpoch {}".format(epoch))
         epoch_start_time = time.time()
-        for i, (input, target) in enumerate(train_loader):
+        for i in range(len(train_loader)):
+            try:
+                input, target = next(iter(train_loader))
+            except:
+                print("bad batch at {}, skipping".format(str(i)))
+                continue
+        # for i, (input, target) in enumerate(train_loader):
+            if i % 100 == 0:
+                print("Time {}: batch {} of {}".format(datetime.now(), i, len(train_loader)))
             with autocast():  # mixed precision
                 output = model(input)
                 loss = loss_fn(output, target) # note - loss also in fp16
@@ -115,7 +125,15 @@ def validate_21k(val_loader, model, met):
     model.eval()
     met.reset()
     with torch.no_grad():
-        for i, (input, target) in enumerate(val_loader):
+        for i in range(len(val_loader)):
+            try:
+                input, target = next(iter(val_loader))
+            except:
+                print("bad batch at {}, skipping".format(str(i)))
+                continue
+            if i % 100 == 0:
+                print("batch {}".format(i))
+        # for i, (input, target) in enumerate(val_loader):
             # mixed precision
             with autocast():
                 logits = model(input).float()
