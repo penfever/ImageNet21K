@@ -79,7 +79,7 @@ def train_21k(model, train_loader, val_loader, optimizer, semantic_softmax_proce
     scheduler = lr_scheduler.OneCycleLR(optimizer, max_lr=args.lr, steps_per_epoch=len(train_loader),
                                         epochs=args.epochs, pct_start=0.1, cycle_momentum=False, div_factor=20)
 
-    # set scalaer
+    # set scaler
     scaler = GradScaler()
     for epoch in range(args.epochs):
         if num_distrib() > 1:
@@ -88,13 +88,13 @@ def train_21k(model, train_loader, val_loader, optimizer, semantic_softmax_proce
         # train epoch
         print_at_master("\nEpoch {}".format(epoch))
         epoch_start_time = time.time()
-        for i in range(len(train_loader)):
-            try:
-                input, target = next(iter(train_loader))
-            except:
-                print("bad batch at {}, skipping".format(str(i)))
-                continue
-        # for i, (input, target) in enumerate(train_loader):
+        # for i in range(len(train_loader)):
+        #     try:
+        #         input, target = next(iter(train_loader))
+        #     except:
+        #         print("bad batch at {}, skipping".format(str(i)))
+        #         continue
+        for i, (input, target) in enumerate(train_loader):
             if i % 100 == 0:
                 print("Time {}: batch {} of {}".format(datetime.now(), i, len(train_loader)))
             with autocast():  # mixed precision
@@ -125,15 +125,15 @@ def validate_21k(val_loader, model, met):
     model.eval()
     met.reset()
     with torch.no_grad():
-        for i in range(len(val_loader)):
-            try:
-                input, target = next(iter(val_loader))
-            except:
-                print("bad batch at {}, skipping".format(str(i)))
-                continue
-            if i % 100 == 0:
-                print("batch {}".format(i))
-        # for i, (input, target) in enumerate(val_loader):
+        # for i in range(len(val_loader)):
+        #     try:
+        #         input, target = next(iter(val_loader))
+        #     except:
+        #         print("bad batch at {}, skipping".format(str(i)))
+        #         continue
+        #     if i % 100 == 0:
+        #         print("batch {}".format(i))
+        for i, (input, target) in enumerate(val_loader):
             # mixed precision
             with autocast():
                 logits = model(input).float()
